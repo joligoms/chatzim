@@ -1,12 +1,13 @@
-import { ChangeEvent, FC, useContext } from "react";
+import { ChangeEvent, FC, FormEvent, useContext } from "react";
 import ColorSelect from "./ColorSelect";
 import { ColorContext } from "../lib/context/ColorContext";
 
 export type UserFormProps = {
     onColorChange: (e: ChangeEvent<HTMLInputElement>) => void
+    onEnterChat: (e: FormEvent<HTMLFormElement>) => void
 }
 
-const UserForm: FC<UserFormProps> = ({onColorChange}) => {
+const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
     const color = useContext(ColorContext);
     const usersOnline = 0;
 
@@ -17,7 +18,13 @@ const UserForm: FC<UserFormProps> = ({onColorChange}) => {
                 <h2 className="text-center mx-auto">{usersOnline > 0 ? `${usersOnline} pessoas online` : 'ninguém online :('}</h2>
             </section>
 
-            <form action="" className="flex flex-col gap-4">
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    onEnterChat(e)
+                }}
+                className="flex flex-col gap-4"
+            >
                 {/* <label htmlFor="username">usuário:</label> */}
                 <input
                     className={`text-white bg-${color}-500 outline-none placeholder:text-neutral-100 p-2 text-center`}

@@ -2,24 +2,26 @@ import { FC } from "react";
 import { cn } from "../lib/utils/cn";
 
 export type Message = {
-    id: string;
     username: string;
-    direction: 'left'|'right';
     message: string;
-    created_at?: string;
+    color: string;
+    direction: 'left'|'right';
+    sent_at: Date;
 };
 
 export type ChatBubbleProps = {
     username: string;
-    displayUsername?: boolean;
     message: string;
     direction?: 'left' | 'right';
+    displayUsername?: boolean;
     color?: string;
+    sent_at: Date;
 };
 
 const ChatBubble: FC<ChatBubbleProps> = ({
         username,
         message,
+        sent_at,
         direction = 'right',
         color = 'indigo',
         displayUsername = true,
@@ -41,7 +43,10 @@ const ChatBubble: FC<ChatBubbleProps> = ({
             >
                 {displayUsername ? <span>{username}</span> : null}
                 <div dir="ltr" className={cn(`bg-${color}-500 text-white p-3 rounded-md whitespace-pre-wrap`)}>
-                    {message}
+                    <div>
+                        {message}
+                    </div>
+                    <div dir="rtl" className="w-full">{sent_at.toLocaleTimeString()}</div>
                 </div>
             </section>
         </div>
