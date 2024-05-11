@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { cn } from "../lib/utils/cn";
 
-export type Message = {
+export type ChatMessage = {
     username: string;
     message: string;
     color: string;

@@ -1,6 +1,7 @@
 import { ChangeEvent, FC, useContext, useEffect, useState } from "react";
 import ColorSelect from "./ColorSelect";
 import { ColorContext } from "../lib/context/ColorContext";
+import { colorOptions } from "../lib/data/colors";
 
 export type UserData = {
     username: string;
@@ -29,8 +30,8 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
     return (
         <section className="drop-shadow-sm bg-slate-200 p-5 self-center justify-self-center w-5/6 rounded-lg">
             <section className="p-3">
-                <h1 className={`text-indigo-500 font-bold text-3xl text-center w-full`}>Chatzim</h1>
-                <h2 className="text-center mx-auto">{usersOnline > 0 ? `${usersOnline} pessoa${usersOnline > 1 ? 's' : ''} online` : 'ninguém online :('}</h2>
+                <h1 className={`text-${color}-700 font-bold text-3xl text-center w-full`}>Chatzim</h1>
+                <h2 className={`text-${color}-600 text-center mx-auto`}>{usersOnline > 0 ? `${usersOnline} pessoa${usersOnline > 1 ? 's' : ''} online` : 'ninguém online :('}</h2>
             </section>
 
             <form
@@ -52,12 +53,9 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
 
                 {/* <label htmlFor="username">cores maneiras:</label> */}
                 <section className="grid grid-cols-3 gap-3 items-center justify-items-center">
-                    <ColorSelect onSelected={onColorChange} color="indigo" className="bg-indigo-500" selected={color === 'indigo'} />
-                    <ColorSelect onSelected={onColorChange} color="red" className="bg-red-500" selected={color === 'red'} />
-                    <ColorSelect onSelected={onColorChange} color="yellow" className="bg-yellow-500" selected={color === 'yellow'} />
-                    <ColorSelect onSelected={onColorChange} color="green" className="bg-green-500" selected={color === 'green'} />
-                    <ColorSelect onSelected={onColorChange} color="amber" className="bg-amber-500" selected={color === 'amber'} />
-                    <ColorSelect onSelected={onColorChange} color="cyan" className="bg-cyan-500" selected={color === 'cyan'} />
+                    {Array.from(colorOptions).map(colorOption => (
+                        <ColorSelect key={colorOption} onSelected={onColorChange} color={colorOption} className={`bg-${colorOption}-500`} selected={color === colorOption} />
+                    ))}
                 </section>
 
                 <button type="submit" className={`bg-${color}-500 text-white py-2 px-4 mx-auto rounded-lg`}>entrar</button>

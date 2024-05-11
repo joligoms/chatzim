@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import ChatInput from "./components/ChatInput"
 import ChatView from "./components/ChatView"
-import ChatBubble, { Message } from "./components/ChatBubble";
+import ChatBubble, { ChatMessage } from "./components/ChatBubble";
 import UserForm, { UserData } from "./components/UserForm";
 import { ColorContext } from "./lib/context/ColorContext";
 import { ServerMessage, useSocket } from "./lib/hooks/useSocket";
@@ -9,7 +9,7 @@ import { ServerMessage, useSocket } from "./lib/hooks/useSocket";
 function App() {
     const [chatHash, setChatHash] = useState<string|null>(null);
     const [user, setUser] = useState<UserData|null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<(ChatMessage|EventMessage)[]>([]);
     const {messages: socketMessages, sendMessage, connectSocket}= useSocket(`ws://${location.host}/ws`);
     const [color, setColor] = useState('indigo');
 
@@ -30,9 +30,17 @@ function App() {
         };
     };
 
+    type EventMessage = {
+        type: 'user-joined' | 'user-left';
+        data: {
+            username: string;
+            color: string;
+            at: UnixTimestamp;
+        }
+    }
+
     useEffect(() => {
         const lastMessage = socketMessages[socketMessages.length - 1] || null as ServerMessage | null;
-        console.log(lastMessage);
         if (!lastMessage) return;
 
         switch (lastMessage?.type) {
@@ -40,10 +48,10 @@ function App() {
                 setChatHash((lastMessage as Handshake).data.hash || null);
                 break;
             case 'user-joined':
-                console.log('entrou o ' + lastMessage?.data?.username);
+                setMessages(prevMessages => [...prevMessages, (lastMessage as EventMessage)])
                 break;
             case 'user-left':
-                console.log('saiu o ' + lastMessage?.data?.username);
+                setMessages(prevMessages => [...prevMessages, (lastMessage as EventMessage)])
                 break;
             case 'recieved-message':
                 setMessages((prevMessages) => {
@@ -54,7 +62,7 @@ function App() {
                         color: data.color,
                         direction: 'left',
                         sent_at: (new Date(data.sent_at)),
-                    } satisfies Message;
+                    } satisfies ChatMessage;
 
                     return [...prevMessages, newMessage];
                 });
@@ -95,8 +103,20 @@ function App() {
                 <ChatView className="grow">
                     {chatHash
                         ? messages.map((msg, index) => {
-                            const prevMsg: Message|null = messages[index - 1] || null;
-                            const displayUsername = prevMsg?.username !== msg.username;
+                            if ('type' in msg) {
+                                console.log(msg);
+                                return (
+                                    <div>
+                                        {msg.type === 'user-joined'
+                                            ? msg.data.username.trim() + ' tá on!!!'
+                                            : msg.data.username.trim() + ' tá off :(((('
+                                        }
+                                    </div>
+                                );
+                            }
+
+                            const prevMsg: ChatMessage|EventMessage|null = messages[index - 1] || null;
+                            const displayUsername = (prevMsg?.type !== undefined) && prevMsg?.username !== msg.username;
 
                             return <ChatBubble
                                 key={msg.sent_at.getTime()}
