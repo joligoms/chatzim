@@ -106,11 +106,18 @@ function App() {
                             if ('type' in msg) {
                                 console.log(msg);
                                 return (
-                                    <div>
-                                        {msg.type === 'user-joined'
-                                            ? msg.data.username.trim() + ' tá on!!!'
-                                            : msg.data.username.trim() + ' tá off :(((('
-                                        }
+                                    <div
+                                        className="event flex items-center gap-2"
+                                        key={`${msg.data.username}_joined_${msg.data.at}`}
+                                    >
+                                        <hr className={`grow border-none h-[1px] text-${msg.data.color}-500 bg-${msg.data.color}-500`} />
+                                        <span className={`text-${msg.data.color}-600`}>
+                                            {msg.type === 'user-joined'
+                                                ? msg.data.username.trim() + ' tá on!!!'
+                                                : msg.data.username.trim() + ' tá off :(((('
+                                            }
+                                        </span>
+                                        <hr className={`grow border-none h-[1px] text-${msg.data.color}-500 bg-${msg.data.color}-500`} />
                                     </div>
                                 );
                             }
