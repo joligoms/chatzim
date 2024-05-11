@@ -1,10 +1,15 @@
-import { ChangeEvent, FC, FormEvent, useContext } from "react";
+import { ChangeEvent, FC, useContext } from "react";
 import ColorSelect from "./ColorSelect";
 import { ColorContext } from "../lib/context/ColorContext";
 
+export type UserData = {
+    username: string;
+    color: string;
+}
+
 export type UserFormProps = {
     onColorChange: (e: ChangeEvent<HTMLInputElement>) => void
-    onEnterChat: (e: FormEvent<HTMLFormElement>) => void
+    onEnterChat: (user: UserData) => void
 }
 
 const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
@@ -21,7 +26,8 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
-                    onEnterChat(e)
+                    const userData = Object.fromEntries(new FormData(e.target as HTMLFormElement)) as UserData;
+                    onEnterChat(userData);
                 }}
                 className="flex flex-col gap-4"
             >

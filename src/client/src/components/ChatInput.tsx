@@ -3,6 +3,7 @@ import { ColorContext } from "../lib/context/ColorContext";
 
 export type ChatInputProps = {
     readOnly?: boolean;
+    onSendMessage: (message: string) => void
 }
 
 export default function ChatInput (props: ChatInputProps) {
@@ -21,7 +22,7 @@ export default function ChatInput (props: ChatInputProps) {
 
     return (
         <section>
-            <form className="w-full p-3 flex shadow-inner" action={''}>
+            <form onSubmit={(e) => e.preventDefault()} className="w-full p-3 flex shadow-inner gap-2" action={''}>
                 <textarea
                     readOnly={props.readOnly}
                     onInput={handleInput}
@@ -31,6 +32,9 @@ export default function ChatInput (props: ChatInputProps) {
                     value={message}
                 >
                 </textarea>
+                <button onClick={() => props.onSendMessage(message || '')} disabled={props.readOnly} className={`bg-${color}-500 text-white p-3 rounded-xl outline-none`}>
+                    enviar
+                </button>
             </form>
         </section>
     );

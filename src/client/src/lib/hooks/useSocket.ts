@@ -18,10 +18,10 @@ export function useSocket(url: string) {
     //     }
     // }, [url]);
 
-    function sendMessage(type: string, data: ServerMessage) {
+    function sendMessage(type: string, data: ServerMessage['data'], hash: string) {
         if (!websocketAvailable(ws)) return;
 
-        ws?.current?.send(JSON.stringify({ type, data }));
+        ws?.current?.send(JSON.stringify({ type, hash, data }));
     }
 
     function connectSocket(data: Record<string, string>) {
@@ -30,6 +30,7 @@ export function useSocket(url: string) {
         ws.current.onopen = () => setIsConnected(true);
         ws.current.onmessage = event => {
             const message = JSON.parse(event.data) as ServerMessage;
+            console.log('enviei tmb', message);
             setMessages((prevMessages) => [...prevMessages, message])
         }
         ws.current.onclose = () => setIsConnected(false);
