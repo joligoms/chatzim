@@ -8,7 +8,7 @@ export type ChatInputProps = {
 
 export default function ChatInput (props: ChatInputProps) {
     const color = useContext(ColorContext);
-    const [message, setMessage] = useState<string>();
+    const [message, setMessage] = useState<string | null>(null);
     // function sendMessage(formData: FormData) {
 
     // }
@@ -20,6 +20,13 @@ export default function ChatInput (props: ChatInputProps) {
         setMessage((event.target as HTMLTextAreaElement).value);
     }
 
+    function handleSendMessage() {
+        const msg = message?.trim();
+        if (!msg) return;
+        props.onSendMessage(msg || '');
+        setMessage(null);
+    }
+
     return (
         <section>
             <form onSubmit={(e) => e.preventDefault()} className="w-full p-3 flex shadow-inner gap-2" action={''}>
@@ -29,10 +36,10 @@ export default function ChatInput (props: ChatInputProps) {
                     rows={numOfRows()}
                     className={`bg-${color}-500 text-white p-3 rounded-xl outline-none grow placeholder:text-neutral-100`}
                     placeholder="Desembuche..."
-                    value={message}
+                    value={message || ''}
                 >
                 </textarea>
-                <button onClick={() => props.onSendMessage(message || '')} disabled={props.readOnly} className={`bg-${color}-500 text-white p-3 rounded-xl outline-none`}>
+                <button onClick={handleSendMessage} disabled={props.readOnly} className={`bg-${color}-500 text-white p-3 rounded-xl outline-none`}>
                     enviar
                 </button>
             </form>

@@ -78,7 +78,7 @@ function App() {
             return [...prevMessages, {
                 username: user.username,
                 message: text,
-                color: user.color,
+                color: user['selected-color'],
                 direction: 'right',
                 sent_at: (new Date()),
             }];

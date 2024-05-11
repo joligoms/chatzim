@@ -7,6 +7,11 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
+        '/api/online-users': {
+            target: 'http://localhost:3005',
+            changeOrigin: true,
+            secure: false
+        },
         '/ws': {
             target: 'ws://localhost:8080',
             ws: true,

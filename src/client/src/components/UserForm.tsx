@@ -1,10 +1,10 @@
-import { ChangeEvent, FC, useContext } from "react";
+import { ChangeEvent, FC, useContext, useEffect, useState } from "react";
 import ColorSelect from "./ColorSelect";
 import { ColorContext } from "../lib/context/ColorContext";
 
 export type UserData = {
     username: string;
-    color: string;
+    'selected-color': string;
 }
 
 export type UserFormProps = {
@@ -14,13 +14,23 @@ export type UserFormProps = {
 
 const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
     const color = useContext(ColorContext);
-    const usersOnline = 0;
+    const [usersOnline, setUsersOnline] = useState<number>(0);
+
+    useEffect(() => {
+        try {
+            fetch('http://' + location.host + '/api/online-users')
+                .then(res => res.json())
+                .then(data => setUsersOnline(data.count));
+        } catch (err) {
+            console.error(err);
+        }
+    }, []);
 
     return (
         <section className="drop-shadow-sm bg-slate-200 p-5 self-center justify-self-center w-5/6 rounded-lg">
             <section className="p-3">
                 <h1 className={`text-indigo-500 font-bold text-3xl text-center w-full`}>Chatzim</h1>
-                <h2 className="text-center mx-auto">{usersOnline > 0 ? `${usersOnline} pessoas online` : 'ninguém online :('}</h2>
+                <h2 className="text-center mx-auto">{usersOnline > 0 ? `${usersOnline} pessoa${usersOnline > 1 ? 's' : ''} online` : 'ninguém online :('}</h2>
             </section>
 
             <form
