@@ -7,6 +7,7 @@ import { ColorContext } from "./lib/context/ColorContext";
 import { ServerMessage, useSocket } from "./lib/hooks/useSocket";
 
 function App() {
+    const [typingUsers, setTypingUsers] = useState<Map<UserData['username'], UserData['selected-color']>>(new Map());
     const [chatHash, setChatHash] = useState<string|null>(null);
     const [user, setUser] = useState<UserData|null>(null);
     const [messages, setMessages] = useState<(ChatMessage|EventMessage)[]>([]);
@@ -30,6 +31,15 @@ function App() {
         };
     };
 
+    type TypingEvent = {
+        type: 'user-typing';
+        data: {
+            isTyping: true;
+            color: string;
+            username: string;
+        }
+    }
+
     type EventMessage = {
         type: 'user-joined' | 'user-left';
         data: {
@@ -52,6 +62,9 @@ function App() {
                 break;
             case 'user-left':
                 setMessages(prevMessages => [...prevMessages, (lastMessage as EventMessage)])
+                break;
+            case 'user-typing':
+                handleTyping(lastMessage as TypingEvent);
                 break;
             case 'recieved-message':
                 setMessages((prevMessages) => {
@@ -78,6 +91,20 @@ function App() {
         connectSocket(user);
     }
 
+    function handleTyping(typingEvent: TypingEvent) {
+        const { data }= typingEvent;
+        if (data.isTyping) {
+            setTypingUsers(prevUsers => new Map(prevUsers.set(data.username, data.color)))
+            return;
+        }
+
+        setTypingUsers(prevUsers => {
+            const deleted = prevUsers.delete(data.username);
+            if (!deleted) return prevUsers;
+            return new Map(prevUsers);
+        });
+    }
+
     function handleSendMessage(text: string) {
         if (!chatHash) throw new Error('No hash was provided.');
         if (!user) throw new Error('No current user was found.');
@@ -95,6 +122,40 @@ function App() {
 
     function handleColorChange(e: ChangeEvent<HTMLInputElement>) {
         setColor(e.target.value);
+    }
+
+    function sendTypingStatus(isTyping: boolean)
+    {
+        if (!chatHash) return;
+        if (!user) return;
+
+        sendMessage('send-typing', { isTyping }, chatHash);
+    }
+
+    function getTypingComponent(users: typeof typingUsers): JSX.Element|null {
+        if (users.size < 1) return null;
+
+
+        if (users.size === 1) {
+            const username = [...typingUsers.keys()][0];
+            return <p className={`text-${users.get(username)}-500`}>{username} está pensando...</p>
+        }
+
+        const usersArr = [...users.keys()];
+
+        return (
+            <p>
+                {usersArr.map((username, index) => {
+                    const len = usersArr.length;
+                    const prefix = len < 4 && index === (len - 1) ? 'e ' : null;
+                    const suffix = index === (len - 1) ? '...' : ', ';
+
+                    return <>
+                    {prefix}<span className={`text-${typingUsers.get(username)}-500`}>{username}</span>{suffix}
+                    </>
+                })}
+            </p>
+        )
     }
 
     return (
@@ -138,7 +199,11 @@ function App() {
                         : <UserForm onEnterChat={enterChat} onColorChange={handleColorChange} />
                     }
                 </ChatView>
-                <ChatInput onSendMessage={handleSendMessage} readOnly={!chatHash} />
+                <ChatInput onTyping={() => sendTypingStatus(true)} onStoppedTyping={() => sendTypingStatus(false)} onSendMessage={handleSendMessage} readOnly={!chatHash}>
+                    <div className="h-5">
+                        {getTypingComponent(typingUsers)}
+                    </div>
+                </ChatInput>
             </ColorContext.Provider>
         </main>
     )

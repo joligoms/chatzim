@@ -1,12 +1,16 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { ColorContext } from "../lib/context/ColorContext";
+import { useDebounce } from "../lib/hooks/useDebounce";
 
-export type ChatInputProps = {
+export type ChatInputProps = PropsWithChildren<{
     readOnly?: boolean;
-    onSendMessage: (message: string) => void
-}
+    onSendMessage: (message: string) => void;
+    onTyping: () => void;
+    onStoppedTyping: () => void;
+}>;
 
 export default function ChatInput (props: ChatInputProps) {
+    const [typing, setTyping] = useState(false);
     const color = useContext(ColorContext);
     const [message, setMessage] = useState<string | null>(null);
     // function sendMessage(formData: FormData) {
@@ -15,8 +19,16 @@ export default function ChatInput (props: ChatInputProps) {
 
     const numOfRows = (): number => Math.min((message || '').split('\n').length, 3);
 
+    const stopTyping = useDebounce(() => setTyping(false), 500);
+
+    useEffect(() => {
+        if (typing) props.onTyping(); else props.onStoppedTyping();
+    }, [typing]);
+
     function handleInput(event: FormEvent<HTMLTextAreaElement>)
     {
+        if (!typing) setTyping(true);
+        stopTyping()
         setMessage((event.target as HTMLTextAreaElement).value);
     }
 
@@ -28,8 +40,9 @@ export default function ChatInput (props: ChatInputProps) {
     }
 
     return (
-        <section>
-            <form onSubmit={(e) => e.preventDefault()} className="w-full p-3 flex shadow-inner gap-2" action={''}>
+        <section className="shadow-inner w-full flex flex-col gap-2 p-3">
+            {props.children}
+            <form onSubmit={(e) => e.preventDefault()} className="w-full flex gap-2" action={''}>
                 <textarea
                     readOnly={props.readOnly}
                     onInput={handleInput}
