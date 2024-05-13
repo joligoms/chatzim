@@ -41,7 +41,7 @@ const ChatBubble: FC<ChatBubbleProps> = ({
                     'after:w-0', 'after:w-0', 'border-s-4'
                 )}
             >
-                {displayUsername ? <span>{username}</span> : null}
+                {displayUsername ? <span className={`text-${color}-700`}>{username}</span> : null}
                 <div dir="ltr" className={cn(`bg-${color}-500 text-white p-3 rounded-md whitespace-pre-wrap`)}>
                     <div>
                         {message}

@@ -158,6 +158,17 @@ function App() {
         )
     }
 
+    function getPrevMessage(beforeIndex: number|null = null): ChatMessage|null {
+        const lastIndex = beforeIndex || messages.length - 1;
+
+        for (let i = lastIndex - 1; i >= 0; i--) {
+            const message = messages[i];
+            if ('direction' in message) return message as ChatMessage;
+        }
+
+        return null;
+    }
+
     return (
         <main className="container h-[100dvh] flex flex-col">
             <ColorContext.Provider value={color}>
@@ -165,7 +176,6 @@ function App() {
                     {chatHash
                         ? messages.map((msg, index) => {
                             if ('type' in msg) {
-                                console.log(msg);
                                 return (
                                     <div
                                         className="event flex items-center gap-2"
@@ -183,8 +193,8 @@ function App() {
                                 );
                             }
 
-                            const prevMsg: ChatMessage|EventMessage|null = messages[index - 1] || null;
-                            const displayUsername = (prevMsg?.type !== undefined) && prevMsg?.username !== msg.username;
+                            const prevMsg: ChatMessage|EventMessage|null = getPrevMessage(index) || null;
+                            const displayUsername = prevMsg?.username !== msg.username;
 
                             return <ChatBubble
                                 key={msg.sent_at.getTime()}
