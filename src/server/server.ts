@@ -15,7 +15,6 @@ const wss = new WebSocket.Server({ port: 8080 });
 const clients = new Map<WebSocket, string>();
 wss.on('connection', (wClient, req) => {
     const connectionData = new URLSearchParams(req.url?.split('?')[1] || '');
-    console.log(connectionData);
 
     const clientName = connectionData.get('username');
     if (!clientName) return;

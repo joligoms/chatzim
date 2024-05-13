@@ -25,12 +25,10 @@ export function useSocket(url: string) {
     }
 
     function connectSocket(data: Record<string, string>) {
-        console.log(url);
         ws.current = new WebSocket(url + '?' + new URLSearchParams(data));
         ws.current.onopen = () => setIsConnected(true);
         ws.current.onmessage = event => {
             const message = JSON.parse(event.data) as ServerMessage;
-            console.log('enviei tmb', message);
             setMessages((prevMessages) => [...prevMessages, message])
         }
         ws.current.onclose = () => setIsConnected(false);
