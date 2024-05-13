@@ -19,7 +19,7 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
 
     useEffect(() => {
         try {
-            fetch('http://' + location.host + '/api/online-users')
+            fetch(import.meta.env.VITE_API_HOST + '/online-users')
                 .then(res => res.json())
                 .then(data => setUsersOnline(data.count));
         } catch (err) {

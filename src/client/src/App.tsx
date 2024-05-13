@@ -11,7 +11,7 @@ function App() {
     const [chatHash, setChatHash] = useState<string|null>(null);
     const [user, setUser] = useState<UserData|null>(null);
     const [messages, setMessages] = useState<(ChatMessage|EventMessage)[]>([]);
-    const {messages: socketMessages, sendMessage, connectSocket}= useSocket(`ws://${location.host}/ws`);
+    const {messages: socketMessages, sendMessage, connectSocket}= useSocket(import.meta.env.VITE_WSS_HOST);
     const [color, setColor] = useState('indigo');
 
     type UnixTimestamp = number;
