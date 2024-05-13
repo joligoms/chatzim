@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import cors from 'cors';
 import express, { json } from 'express';
 import { RawData, WebSocket } from 'ws';
 // import db from './src/db/database';
@@ -106,6 +107,10 @@ wss.on('connection', (wClient, req) => {
 const app = express();
 const router = express.Router();
 
+app.use(cors({
+    origin: env.ALLOWED_ORIGIN,
+    optionsSuccessStatus: 200
+}));
 app.use(json());
 app.use('/api', router);
 
