@@ -23,11 +23,6 @@ wss.on('connection', (wClient, req) => {
     clients.set(wClient, clientHash);
     const clientColor = connectionData.get('selected-color');
 
-    wClient.send(JSON.stringify({
-        type: 'handshake',
-        data: { hash: clientHash }
-    }));
-
     const getMessage = (message: RawData) => {
         try {
             return JSON.parse(message.toString()) as Record<string, any>
@@ -36,14 +31,22 @@ wss.on('connection', (wClient, req) => {
         }
     };
 
+    // Send hash handshake
+    wClient.send(JSON.stringify({
+        type: 'handshake',
+        data: { hash: clientHash }
+    }));
+
+
+    // Notify other users the connected user has joined
     wss.clients.forEach((client) => {
         if (client === wClient || client.readyState !== WebSocket.OPEN) return;
         client.send(JSON.stringify({
             type: 'user-joined',
             data: {
                 username: clientName,
-                joined_at: (new Date).getTime(),
-                color: clientColor
+                color: clientColor,
+                at: (new Date).getTime(),
             }
         }));
     })
@@ -71,6 +74,16 @@ wss.on('connection', (wClient, req) => {
                         }
                     };
                     break;
+                case 'send-typing':
+                    data = {
+                        type: 'user-typing',
+                        data: {
+                            username: clientName,
+                            color: clientColor,
+                            isTyping: msg.data.isTyping,
+                        }
+                    };
+                    break;
                 default:
                     data = msg;
                     break;
@@ -83,7 +96,10 @@ wss.on('connection', (wClient, req) => {
     wClient.on('close', () => {
         wss.clients.forEach((client) => {
             if (client === wClient || client.readyState !== WebSocket.OPEN) return;
-            client.send(JSON.stringify({ type: 'user-left', data: {'username': clientName}}));
+            client.send(JSON.stringify({
+                type: 'user-left',
+                data: {'username': clientName, 'color': clientColor, at: (new Date).getTime()}}
+            ));
         });
     });
 });
