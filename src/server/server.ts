@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import cors from 'cors';
+import http from 'http';
 import express, { json } from 'express';
 import { RawData, WebSocket } from 'ws';
 // import db from './src/db/database';
@@ -11,7 +12,24 @@ type ClientMessage = {
     data: Record<string, any>;
 };
 
-const wss = new WebSocket.Server({ port: 8080 });
+const app = express();
+const router = express.Router();
+
+app.use(cors({
+    origin: env.ALLOWED_ORIGIN,
+    optionsSuccessStatus: 200
+}));
+app.use(json());
+app.use('/api', router);
+
+router.get('/online-users', (_, res) => res.json({ count: wss.clients.size}));
+
+const port = env.API_PORT;
+
+const server = http.createServer();
+const wss = new WebSocket.Server({
+    server, perMessageDeflate: false
+});
 
 const clients = new Map<WebSocket, string>();
 wss.on('connection', (wClient, req) => {
@@ -104,19 +122,4 @@ wss.on('connection', (wClient, req) => {
     });
 });
 
-const app = express();
-const router = express.Router();
-
-app.use(cors({
-    origin: env.ALLOWED_ORIGIN,
-    optionsSuccessStatus: 200
-}));
-app.use(json());
-app.use('/api', router);
-
-router.get('/online-users', (_, res) => res.json({ count: wss.clients.size}));
-
-const port = env.API_PORT;
-app.listen(port, () => {
-    console.log('server is listening on port ' + port);
-});
+server.listen(env.API_PORT, () => console.log('server is up!'));
