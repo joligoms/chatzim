@@ -16,6 +16,7 @@ export type UserFormProps = {
 const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
     const color = useContext(ColorContext);
     const [usersOnline, setUsersOnline] = useState<number>(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         try {
@@ -38,6 +39,7 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
                 onSubmit={(e) => {
                     e.preventDefault();
                     const userData = Object.fromEntries(new FormData(e.target as HTMLFormElement)) as UserData;
+                    setLoading(true);
                     onEnterChat(userData);
                 }}
                 className="flex flex-col gap-4"
@@ -58,7 +60,13 @@ const UserForm: FC<UserFormProps> = ({onColorChange, onEnterChat}) => {
                     ))}
                 </section>
 
-                <button type="submit" className={`bg-${color}-500 text-white py-2 px-4 mx-auto rounded-lg`}>entrar</button>
+                <button type="submit" className={`bg-${color}-500 text-white py-2 px-4 mx-auto rounded-lg`}>
+                    {
+                        loading
+                        ? <div className="w-5 h-5 rounded-full animate-spin border-2 border-solid border-white border-t-transparent"></div>
+                        : 'entrar'
+                    }
+                </button>
             </form>
         </section>
     );
